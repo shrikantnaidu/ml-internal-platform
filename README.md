@@ -18,10 +18,11 @@ mlflow/
 
 ```
 mlflow/
-├── .env                 # Postgres database credentials and MLflow port mapping
+├── .env.example         # Safe configuration template
+├── .env                 # Local secrets and MLflow port mapping (not committed)
 ├── Dockerfile           # MLflow base image + uv package installer
 ├── docker-compose.yml   # Multi-container orchestration definition
-└── requirements.txt     # Extra Python packages (e.g. psycopg, psycopg2-binary, boto3)
+└── requirements.txt     # Extra Python packages required by the server
 ```
 
 ---
@@ -30,9 +31,11 @@ mlflow/
 
 ### 1. Configure Environment (`.env`)
 
+Copy `.env.example` to `.env`, then replace `change-me` with a strong database password.
+
 ```env
 POSTGRES_USER=mlflow
-POSTGRES_PASSWORD=mlflow
+POSTGRES_PASSWORD=change-me
 POSTGRES_DB=mlflow
 MLFLOW_PORT=7777
 ```
@@ -58,6 +61,8 @@ curl http://localhost:7777/health
 ```
 
 - **MLflow Web UI**: [http://localhost:7777](http://localhost:7777)
+
+The default Compose configuration binds MLflow to localhost and proxies artifacts through the server into the persistent `mlflow-artifacts` volume. If `MLFLOW_PORT` is changed, use that port in the commands and URLs above.
 
 ---
 
@@ -88,4 +93,4 @@ with mlflow.start_run():
 | Stop stack | `docker compose down` |
 | View logs | `docker compose logs -f mlflow` |
 | Restart server | `docker compose restart mlflow` |
-| Tear down + wipe storage | `docker compose down -v` |
+| Tear down + wipe storage | `docker compose down -v` *(deletes database and artifact volumes)* |
